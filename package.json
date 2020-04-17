@@ -1,0 +1,30 @@
+{
+  "name": "catalyst-plugin-graphql",
+  "version": "0.0.1",
+  "description": "graphql plugin for catalyst",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Raychee/catalyst-plugin-graphql.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Raychee/catalyst-plugin-graphql/issues"
+  },
+  "homepage": "https://github.com/Raychee/catalyst-plugin-graphql#readme",
+  "dependencies": {
+    "@raychee/utils": "^0.1.19",
+    "apollo-cache-inmemory": "^1.6.5",
+    "apollo-client": "^2.6.8",
+    "apollo-link": "^1.2.14",
+    "apollo-link-http": "^1.5.17",
+    "apollo-link-persisted-queries": "^0.2.2",
+    "graphql": "^14.6.0",
+    "graphql-tag": "^2.10.3",
+    "graphql-tools": "^5.0.0",
+    "lodash": "^4.17.15",
+    "node-fetch": "^2.6.0"
+  }
+}
