@@ -103,21 +103,22 @@ class GraphQLClient {
 
     _makeReturnExpr(projections) {
         if (!projections) return '';
-        return `{${Object.entries(projections)
+        const expr = Object.entries(projections)
             .map(([field, show]) => {
                 if (typeof show === 'object') {
-                    const expr = this._makeReturnExpr(show);
-                    if (expr === '{}') {
-                        return '';
-                    }
-                    return `${field} ${expr}`;
+                    return `${field} ${this._makeReturnExpr(show)}`;
                 }
                 if (show) {
                     return field;
                 }
             })
             .filter(v => v)
-            .join(', ')}}`;
+            .join(', ');
+        if (expr) {
+            return `{${expr}}`;
+        } else {
+            return '';
+        }
     }
 
     _makeDefaultProjection(returnType) {
