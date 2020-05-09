@@ -1,6 +1,6 @@
 {
   "name": "@raychee/catalyst-plugin-graphql",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "graphql plugin for catalyst",
   "main": "index.js",
   "scripts": {},
@@ -15,7 +15,7 @@
   },
   "homepage": "https://github.com/Raychee/catalyst-plugin-graphql#readme",
   "dependencies": {
-    "@raychee/utils": "^0.1.19",
+    "@raychee/utils": "^0.2.3",
     "apollo-cache-inmemory": "^1.6.5",
     "apollo-client": "^2.6.8",
     "apollo-link": "^1.2.14",
