@@ -33,7 +33,7 @@ class GraphQLClient {
             const queryArgDeclare = field.args.map(a => `$${a.name}: ${this._makeFieldTypeExpr(a.type)}`).join(', ');
             const queryArgs = field.args.map(a => `${a.name}: $${a.name}`).join(', ');
             const defaultProjections = this._makeDefaultProjection(getNamedType(field.type));
-            this[field.name] = async (logger, variables, projections) => {
+            this[field.name] = async (logger, variables, projections, options = {}) => {
                 logger = logger || this.logger;
                 if (!projections || isEmpty(projections)) projections = defaultProjections;
                 try {
@@ -41,7 +41,8 @@ class GraphQLClient {
                     const resp = await this.apollo.query({
                         query: gql`query (${queryArgDeclare}) { ${field.name} (${queryArgs}) ${this._makeReturnExpr(projections)} }`,
                         variables,
-                        context: {logger}
+                        ...options,
+                        context: {logger, ...options.context},
                     });
                     return resp.data[field.name];
                 } catch (e) {
@@ -57,7 +58,7 @@ class GraphQLClient {
             const queryArgDeclare = field.args.map(a => `$${a.name}: ${this._makeFieldTypeExpr(a.type)}`).join(', ');
             const queryArgs = field.args.map(a => `${a.name}: $${a.name}`).join(', ');
             const defaultProjections = this._makeDefaultProjection(getNamedType(field.type));
-            this[field.name] = async (logger, variables, projections) => {
+            this[field.name] = async (logger, variables, projections, options = {}) => {
                 logger = logger || this.logger;
                 if (!projections || isEmpty(projections)) projections = defaultProjections;
                 try {
@@ -65,7 +66,8 @@ class GraphQLClient {
                     const resp = await this.apollo.mutate({
                         mutation: gql`mutation (${queryArgDeclare}) { ${field.name} (${queryArgs}) ${this._makeReturnExpr(projections)} }`,
                         variables,
-                        context: {logger}
+                        ...options,
+                        context: {logger, ...options.context},
                     });
                     return resp.data[field.name];
                 } catch (e) {
