@@ -1,6 +1,6 @@
 {
   "name": "@raychee/catalyst-plugin-graphql",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "graphql plugin for catalyst",
   "main": "index.js",
   "scripts": {},
@@ -24,7 +24,7 @@
     "graphql": "^14.6.0",
     "graphql-tag": "^2.10.3",
     "graphql-tools": "^5.0.0",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "node-fetch": "^2.6.0"
   }
 }

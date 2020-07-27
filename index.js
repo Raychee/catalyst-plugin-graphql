@@ -54,27 +54,29 @@ class GraphQLClient {
                 }
             }
         }
-        for (const field of Object.values(this.schema.getMutationType().getFields())) {
-            const queryArgDeclare = field.args.map(a => `$${a.name}: ${this._makeFieldTypeExpr(a.type)}`).join(', ');
-            const queryArgs = field.args.map(a => `${a.name}: $${a.name}`).join(', ');
-            const defaultProjections = this._makeDefaultProjection(getNamedType(field.type));
-            this[field.name] = async (logger, variables, projections, options = {}) => {
-                logger = logger || this.logger;
-                if (!projections || isEmpty(projections)) projections = defaultProjections;
-                try {
-                    await this._ensureClient();
-                    const resp = await this.apollo.mutate({
-                        mutation: gql`mutation (${queryArgDeclare}) { ${field.name} (${queryArgs}) ${this._makeReturnExpr(projections)} }`,
-                        variables,
-                        ...options,
-                        context: {logger, ...options.context},
-                    });
-                    return resp.data[field.name];
-                } catch (e) {
-                    if (e.networkError && (!e.networkError.statusCode || e.networkError.statusCode >= 500)) {
-                        logger.fail('_failed_api_server_error', e);
-                    } else {
-                        throw e;
+        if (this.schema.getMutationType()) {
+            for (const field of Object.values(this.schema.getMutationType().getFields())) {
+                const queryArgDeclare = field.args.map(a => `$${a.name}: ${this._makeFieldTypeExpr(a.type)}`).join(', ');
+                const queryArgs = field.args.map(a => `${a.name}: $${a.name}`).join(', ');
+                const defaultProjections = this._makeDefaultProjection(getNamedType(field.type));
+                this[field.name] = async (logger, variables, projections, options = {}) => {
+                    logger = logger || this.logger;
+                    if (!projections || isEmpty(projections)) projections = defaultProjections;
+                    try {
+                        await this._ensureClient();
+                        const resp = await this.apollo.mutate({
+                            mutation: gql`mutation (${queryArgDeclare}) { ${field.name} (${queryArgs}) ${this._makeReturnExpr(projections)} }`,
+                            variables,
+                            ...options,
+                            context: {logger, ...options.context},
+                        });
+                        return resp.data[field.name];
+                    } catch (e) {
+                        if (e.networkError && (!e.networkError.statusCode || e.networkError.statusCode >= 500)) {
+                            logger.fail('_failed_api_server_error', e);
+                        } else {
+                            throw e;
+                        }
                     }
                 }
             }
@@ -153,5 +155,23 @@ module.exports = {
         return client;
     },
 
-    GraphQLClient,
+    async newGraphqlClient({links = [], clientOptions, httpOptions, otherOptions = {resetStoreEvery: 100}} = {}) {
+        const logger = {
+            fail: (...args) => { throw new Error(args.join('')) },
+        };
+        links = await ensureThunkCall(links, this);
+        const client = new GraphQLClient(logger, links, clientOptions, httpOptions, otherOptions);
+        await client._connect();
+        return new Proxy(client, {
+            get(target, p, receiver) {
+                const prop = Reflect.get(target, p, receiver);
+                if (typeof prop === 'function' && !p.startsWith('_')) {
+                    return prop.bind(target, logger);
+                } else {
+                    return prop;
+                }
+            }
+        });
+        
+    },
 };
