@@ -157,7 +157,10 @@ module.exports = {
 
     async newGraphqlClient({links = [], clientOptions, httpOptions, otherOptions = {resetStoreEvery: 100}} = {}) {
         const logger = {
+            info: (...args) => { console.log(args.join('')); },
+            warn: (...args) => { console.log(args.join('')); },
             fail: (...args) => { throw new Error(args.join('')) },
+            crash: (...args) => { throw new Error(args.join('')) },
         };
         links = await ensureThunkCall(links, this);
         const client = new GraphQLClient(logger, links, clientOptions, httpOptions, otherOptions);
