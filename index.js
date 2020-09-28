@@ -143,6 +143,20 @@ class GraphQLClient {
 }
 
 
+const defaultLogger = {
+    info(...args) { console.log(args.join('')); },
+    warn(...args) { console.error(args.join('')); },
+    fail(code, err, ...args) { 
+        if (err instanceof Error && args.length <= 0) throw err; 
+        else throw new Error([err, ...args].join('')); 
+    },
+    crash(code, err, ...args) {
+        if (err instanceof Error && args.length <= 0) throw err;
+        else throw new Error([err, ...args].join(''));
+    },
+}
+
+
 module.exports = {
     type: 'graphql',
     key({links = [], clientOptions, httpOptions, otherOptions = {resetStoreEvery: 100}} = {}) {
@@ -155,13 +169,7 @@ module.exports = {
         return client;
     },
 
-    async newGraphqlClient({links = [], clientOptions, httpOptions, otherOptions = {resetStoreEvery: 100}} = {}) {
-        const logger = {
-            info: (...args) => { console.log(args.join('')); },
-            warn: (...args) => { console.log(args.join('')); },
-            fail: (...args) => { throw new Error(args.join('')) },
-            crash: (...args) => { throw new Error(args.join('')) },
-        };
+    async newGraphqlClient({links = [], clientOptions, httpOptions, otherOptions = {resetStoreEvery: 100}, logger = defaultLogger} = {}) {
         links = await ensureThunkCall(links, this);
         const client = new GraphQLClient(logger, links, clientOptions, httpOptions, otherOptions);
         await client._connect();
