@@ -30,8 +30,10 @@ class GraphQLClient {
     async _connect() {
         this.schema = await introspectSchema(ApolloLink.from(this.links));
         for (const field of Object.values(this.schema.getQueryType().getFields())) {
-            const queryArgDeclare = field.args.map(a => `$${a.name}: ${this._makeFieldTypeExpr(a.type)}`).join(', ');
-            const queryArgs = field.args.map(a => `${a.name}: $${a.name}`).join(', ');
+            const queryArgDeclare = field.args.length > 0 ? 
+                '(' + field.args.map(a => `$${a.name}: ${this._makeFieldTypeExpr(a.type)}`).join(', ') + ')' : '';
+            const queryArgs = field.args.length > 0 ?
+                '(' + field.args.map(a => `${a.name}: $${a.name}`).join(', ') + ')' : '';
             const defaultProjections = this._makeDefaultProjection(getNamedType(field.type));
             this[field.name] = async (logger, variables, projections, options = {}) => {
                 logger = logger || this.logger;
@@ -39,7 +41,7 @@ class GraphQLClient {
                 try {
                     await this._ensureClient();
                     const resp = await this.apollo.query({
-                        query: gql`query (${queryArgDeclare}) { ${field.name} (${queryArgs}) ${this._makeReturnExpr(projections)} }`,
+                        query: gql`query ${queryArgDeclare} { ${field.name} ${queryArgs} ${this._makeReturnExpr(projections)} }`,
                         variables,
                         ...options,
                         context: {logger, ...options.context},
@@ -56,8 +58,10 @@ class GraphQLClient {
         }
         if (this.schema.getMutationType()) {
             for (const field of Object.values(this.schema.getMutationType().getFields())) {
-                const queryArgDeclare = field.args.map(a => `$${a.name}: ${this._makeFieldTypeExpr(a.type)}`).join(', ');
-                const queryArgs = field.args.map(a => `${a.name}: $${a.name}`).join(', ');
+                const queryArgDeclare = field.args.length > 0 ?
+                    '(' + field.args.map(a => `$${a.name}: ${this._makeFieldTypeExpr(a.type)}`).join(', ') + ')' : '';
+                const queryArgs = field.args.length > 0 ?
+                    '(' + field.args.map(a => `${a.name}: $${a.name}`).join(', ') + ')' : '';
                 const defaultProjections = this._makeDefaultProjection(getNamedType(field.type));
                 this[field.name] = async (logger, variables, projections, options = {}) => {
                     logger = logger || this.logger;
@@ -65,7 +69,7 @@ class GraphQLClient {
                     try {
                         await this._ensureClient();
                         const resp = await this.apollo.mutate({
-                            mutation: gql`mutation (${queryArgDeclare}) { ${field.name} (${queryArgs}) ${this._makeReturnExpr(projections)} }`,
+                            mutation: gql`mutation ${queryArgDeclare} { ${field.name} ${queryArgs} ${this._makeReturnExpr(projections)} }`,
                             variables,
                             ...options,
                             context: {logger, ...options.context},
